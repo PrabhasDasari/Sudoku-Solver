@@ -25,56 +25,13 @@ var SudokuSolver = function (testable) {
     return solvedBoard;
   }
 
-  // PRIVATE FUNCTIONS
-  function recursiveSolve(boardString) {
-    var boardArray = boardString.split("");
-    if (boardIsSolved(boardArray)) {
-      return boardArray.join("");
-    }
-    var cellPossibilities = getNextCellAndPossibilities(boardArray);
-    var nextUnsolvedCellIndex = cellPossibilities.index;
-    var possibilities = cellPossibilities.choices;
-    for (var i = 0; i < possibilities.length; i++) {
-      boardArray[nextUnsolvedCellIndex] = possibilities[i];
-      var solvedBoard = recursiveSolve(boardArray.join(""));
-      if (solvedBoard) {
-        return solvedBoard;
-      }
-    }
-    return false;
-  }
-
+  // PRIVATE FUNCTIONS 
   function boardIsInvalid(boardArray) {
     return !boardIsValid(boardArray);
   }
 
   function boardIsValid(boardArray) {
     return allRowsValid(boardArray) && allColumnsValid(boardArray) && allBoxesValid(boardArray);
-  }
-
-  function boardIsSolved(boardArray) {
-    for (var i = 0; i < boardArray.length; i++) {
-      if (boardArray[i] === "-") {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  function getNextCellAndPossibilities(boardArray) {
-    for (var i = 0; i < boardArray.length; i++) {
-      if (boardArray[i] === "-") {
-        var existingValues = getAllIntersections(boardArray, i);
-        var choices = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].filter(function (num) {
-          return existingValues.indexOf(num) < 0;
-        });
-        return { index: i, choices: choices };
-      }
-    }
-  }
-
-  function getAllIntersections(boardArray, i) {
-    return getRow(boardArray, i).concat(getColumn(boardArray, i)).concat(getBox(boardArray, i));
   }
 
   function allRowsValid(boardArray) {
@@ -84,10 +41,24 @@ var SudokuSolver = function (testable) {
       return collectionIsValid(row) && validity;
     }, true);
   }
-
+ 
   function getRow(boardArray, i) {
     var startingEl = Math.floor(i / 9) * 9;
     return boardArray.slice(startingEl, startingEl + 9);
+  }
+
+  function collectionIsValid(collection) {
+    var numCounts = {};
+    for(var i = 0; i < collection.length; i++) {
+      if (collection[i] != "-") {
+        if (numCounts[collection[i]] === undefined) {
+          numCounts[collection[i]] = 1;
+        } else {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   function allColumnsValid(boardArray) {
@@ -122,18 +93,47 @@ var SudokuSolver = function (testable) {
     });
   }
 
-  function collectionIsValid(collection) {
-    var numCounts = {};
-    for(var i = 0; i < collection.length; i++) {
-      if (collection[i] != "-") {
-        if (numCounts[collection[i]] === undefined) {
-          numCounts[collection[i]] = 1;
-        } else {
-          return false;
-        }
+  function recursiveSolve(boardString) {
+    var boardArray = boardString.split("");
+    if (boardIsSolved(boardArray)) {
+      return boardArray.join("");
+    }
+    var cellPossibilities = getNextCellAndPossibilities(boardArray);
+    var nextUnsolvedCellIndex = cellPossibilities.index;
+    var possibilities = cellPossibilities.choices;
+    for (var i = 0; i < possibilities.length; i++) {
+      boardArray[nextUnsolvedCellIndex] = possibilities[i];
+      var solvedBoard = recursiveSolve(boardArray.join(""));
+      if (solvedBoard) {
+        return solvedBoard;
+      }
+    }
+    return false;
+  }
+
+  function boardIsSolved(boardArray) {
+    for (var i = 0; i < boardArray.length; i++) {
+      if (boardArray[i] === "-") {
+        return false;
       }
     }
     return true;
+  }
+
+  function getNextCellAndPossibilities(boardArray) {
+    for (var i = 0; i < boardArray.length; i++) {
+      if (boardArray[i] === "-") {
+        var existingValues = getAllIntersections(boardArray, i);
+        var choices = ["1", "2", "3", "4", "5", "6", "7", "8", "9"].filter(function (num) {
+          return existingValues.indexOf(num) < 0;
+        });
+        return { index: i, choices: choices };
+      }
+    }
+  }
+
+  function getAllIntersections(boardArray, i) {
+    return getRow(boardArray, i).concat(getColumn(boardArray, i)).concat(getBox(boardArray, i));
   }
 
   function toString(boardArray) {
